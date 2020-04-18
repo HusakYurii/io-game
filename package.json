@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "io game",
   "scripts": {
+    "run-server": "nodemon",
     "clone-client": "git clone https://github.com/HusakYurii/io-game-client.git",
     "clone-server": "git clone https://github.com/HusakYurii/io-game-server.git",
     "clone-all": "npm run clone-client && npm run clone-server"
@@ -26,5 +27,9 @@
   "bugs": {
     "url": "https://github.com/HusakYurii/io-game/issues"
   },
-  "homepage": "https://github.com/HusakYurii/io-game#readme"
+  "homepage": "https://github.com/HusakYurii/io-game#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
 }

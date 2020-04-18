@@ -1,0 +1,9 @@
+{
+  "watch": [
+    "./io-game-server/**/*"
+  ],
+  "delay": "500",
+  "ext": "js, ts",
+  "ignore": ["node_modules"],
+  "exec": "node ./io-game-server/index.js"
+}
