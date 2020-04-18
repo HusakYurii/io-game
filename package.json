@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "io game",
   "scripts": {
-    "run-server": "nodemon",
+    "run-nodemon": "nodemon",
+    "run-webpack": "npm run run-webpack-prod && npm run run-webpack-dev",
+    "run-server": "node ./io-game-server/index.js",
+    "run-webpack-dev": "webpack-dev-server --config webpack.config.dev.js",
+    "run-webpack-prod": "webpack --config webpack.config.prod.js",
     "clone-client": "git clone https://github.com/HusakYurii/io-game-client.git",
     "clone-server": "git clone https://github.com/HusakYurii/io-game-server.git",
     "clone-all": "npm run clone-client && npm run clone-server"
@@ -30,6 +34,16 @@
   "homepage": "https://github.com/HusakYurii/io-game#readme",
   "dependencies": {},
   "devDependencies": {
-    "nodemon": "^2.0.3"
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "babel-loader": "^8.1.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "dotenv": "^8.2.0",
+    "html-webpack-plugin": "^4.2.0",
+    "nodemon": "^2.0.3",
+    "source-map-loader": "^0.2.4",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   }
 }
