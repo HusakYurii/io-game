@@ -3,17 +3,21 @@
   "version": "1.0.0",
   "description": "io game",
   "scripts": {
-    "run-nodemon": "nodemon",
-    "run-nodemon-debugg": "node --inspect ./io-game-server/index.js",
-    "run-webpack": "npm run run-webpack-prod && npm run run-webpack-dev",
+    "run-nodemon-dev": "nodemon",
+    "run-nodemon-prod": "set NODE_ENV=production && nodemon",
+    
+    "run-server-debugger-dev": "node --inspect ./io-game-server/index.js",
+    "run-server-debugger-prod": "set NODE_ENV=production && node --inspect ./io-game-server/index.js",
     "run-server": "node ./io-game-server/index.js",
+
+    "run-webpack": "npm run run-webpack-prod && npm run run-webpack-dev",
     "run-webpack-dev": "webpack-dev-server --config webpack.config.dev.js",
     "run-webpack-prod": "webpack --config webpack.config.prod.js",
+
     "clone-client": "git clone https://github.com/HusakYurii/io-game-client.git",
     "clone-server": "git clone https://github.com/HusakYurii/io-game-server.git",
     "clone-all": "npm run clone-client && npm run clone-server"
   },
-  "debugg-info": "to run node debugger in chrome devtools, use 'run-webpack' && 'run-nodemon-debugg'. More info https://flaviocopes.com/node-debug-devtools/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HusakYurii/io-game.git"
