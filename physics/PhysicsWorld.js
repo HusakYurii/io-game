@@ -2,6 +2,7 @@ const Logger = require("../io-game-server/js/Logger.js");
 const Vector2D = require("./Vector2D.js");
 const PhysicsObject = require("./PhysicsObject.js");
 const PlayerObject = require("./PlayerObject.js");
+const BotObject = require("./BotObject.js");
 const { randomInt } = require("../shared/Tools.js");
 
 class PhysicsWorld {
@@ -12,10 +13,15 @@ class PhysicsWorld {
         this.itemsToDelete = [];
         this.itemsIdCounter = -1;
 
-        this.itemsToCreate = 100;
+        this.botsAmount = 5;
+        this.botsToRespawn = 5;
+        this.botsRespawnTime = randomInt(2000, 10000);
+        this.botsRespawnTimer = 0;
+
+        this.itemsAmount = 100;
         this.itemsToRespawn = 0;
-        this.itemsRespawnTimer = 500;
-        this.timeCounter = 0;
+        this.itemsRespawnTime = randomInt(200, 600);
+        this.itemsRespawnTimer = 0;
 
         this.loopRennerId = "";
         this.prevTimestamp = 0;
@@ -46,7 +52,27 @@ class PhysicsWorld {
         Logger.addDividerLabel("Physics World Cleaned", "#FFFF00", "#000000");
     }
 
-    createItems(amount = this.itemsToCreate) {
+    createBots(amount = this.botsAmount) {
+        for (let i = 0; i < amount; i += 1) {
+            this.players.push(this.createBot());
+        }
+    }
+
+    createBot() {
+        this.itemsIdCounter += 1;
+        return new BotObject(
+            String(this.itemsIdCounter),
+            new Vector2D(randomInt(-1500, 1500), randomInt(-1500, 1500)),
+            30
+        );
+    }
+
+    removeBot() {
+        const bot = this.players.find((player) => player.isBot);
+        this.removePlayer(bot.id);
+    }
+
+    createItems(amount = this.itemsAmount) {
         for (let i = 0; i < amount; i += 1) {
             this.items.push(this.createItem());
         }
@@ -62,6 +88,7 @@ class PhysicsWorld {
     }
 
     createPlayer(playerId) {
+        this.removeBot();
         const pos = new Vector2D(randomInt(-200, 200), randomInt(-200, 200))
         const player = new PlayerObject(playerId, pos, 30);
         this.players.push(player);
@@ -71,6 +98,8 @@ class PhysicsWorld {
         this.players = this.players.filter((player) => {
             return player.id !== playerId;
         });
+        
+        this.botsToRespawn += this.players.length < 10 ? 1 : 0;
     }
 
     updatePlayerDir(data) {
@@ -93,6 +122,7 @@ class PhysicsWorld {
         this.calculateGravity(dt);
         this.calculateCollisions();
         this.respawnItems(dt);
+        this.respawnBots(dt);
         this.sendData();
     }
 
@@ -157,11 +187,26 @@ class PhysicsWorld {
             return;
         }
 
-        this.timeCounter += dt * this.dtConstant;
-        if (this.timeCounter > this.itemsRespawnTimer) {
-            this.timeCounter = 0;
+        this.itemsRespawnTimer += dt * this.dtConstant;
+        if (this.itemsRespawnTimer > this.itemsRespawnTime) {
+            this.itemsRespawnTime = randomInt(200, 600);
+            this.itemsRespawnTimer = 0;
             this.itemsToRespawn -= 1;
             this.items.push(this.createItem());
+        }
+    }
+
+    respawnBots(dt) {
+        if(this.botsToRespawn <= 0) {
+            return;
+        }
+
+        this.botsRespawnTime += dt * this.dtConstant;
+        if(this.botsRespawnTime > this.botsRespawnTimer) {
+            this.botsRespawnTimer = randomInt(2000, 10000);
+            this.botsRespawnTime = 0;
+            this.botsToRespawn -= 1;
+            this.players.push(this.createBot());
         }
     }
 
