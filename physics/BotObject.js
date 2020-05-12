@@ -1,15 +1,18 @@
 const PlayerObject = require("./PlayerObject.js");
 const Vector2D = require("./Vector2D.js");
 const { randomFloat, randomInt } = require("../shared/Tools.js");
+const { GAME_CONSTANTS } = require("../shared/Constants.js");
 
 class BotObject extends PlayerObject {
     constructor(id, pos, r) {
         super(id, pos, r);
 
         this.isBot = true;
-        this.actionTime = randomInt(0, 3000);
-        this.actionTimer = 0;
         this.currDir = new Vector2D(randomFloat(-1, 1), randomFloat(-1, 1));
+
+        const [min, max] = GAME_CONSTANTS.BOT_ACTION_TIME_RANGE;
+        this.actionTime = randomInt(min, max);
+        this.actionTimer = 0;
     }
 
     /**
@@ -26,10 +29,12 @@ class BotObject extends PlayerObject {
      * @param {number} dt 
      */
     updateActionTimer(dt) {
-        this.actionTimer += dt * 1000 / 60;
+        this.actionTimer += dt * GAME_CONSTANTS.LOOP_DELTA_TIME;  // to convert it back to ms
         if (this.actionTimer > this.actionTime) {
-            this.actionTime = randomInt(0, 3000);
+            const [min, max] = GAME_CONSTANTS.BOT_ACTION_TIME_RANGE;
+            this.actionTime = randomInt(min, max);
             this.actionTimer = 0;
+
             this.activate();
             this.currDir = new Vector2D(randomFloat(-1, 1), randomFloat(-1, 1));
         }

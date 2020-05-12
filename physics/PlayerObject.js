@@ -1,5 +1,6 @@
 const PhysicsObject = require("./PhysicsObject.js");
 const Vector2D = require("./Vector2D.js");
+const { GAME_CONSTANTS } = require("../shared/Constants.js");
 
 class PlayerObject extends PhysicsObject {
     constructor(id, pos, r) {
@@ -7,18 +8,21 @@ class PlayerObject extends PhysicsObject {
 
         this.score = 0;
 
-        this.isActivated = false;
-        this.gravityEasing = 0.5;  // TODO change it to function
-        this.gravityTime = 3000;
+        const [grtMin, grtMax] = GAME_CONSTANTS.PLAYER_GRAVITY_TIME_RANGE;
+        this.gravityTime = grtMax;
         this.gravityTimer = 0;
+        this.gravityEasing = 0.5;  // TODO change it to function
+        this.isActivated = false;
+
         this.gravityRadiusEasint = 1.2;
         this.gravityRadius = (3 * this.r);
 
 
+        const [cdtMin, cdtMax] = GAME_CONSTANTS.PLAYER_COOLDOWN_TIME_RANGE
+        this.coolDownTime = cdtMin;
+        this.coolDownTimer = 0;
         this.isCooledDown = true;
         this.coolDownEasing = 2.5;  // TODO change it to function
-        this.coolDownTime = 6000;
-        this.coolDownTimer = 0;
 
         // TODO change it to function
         this.velocityEasing = 1.2;
@@ -82,10 +86,11 @@ class PlayerObject extends PhysicsObject {
             return;
         }
 
-        this.gravityTimer += dt * 1000 / 60;  // import it as a constant in the future
+        this.gravityTimer += dt * GAME_CONSTANTS.LOOP_DELTA_TIME;
         if (this.gravityTimer >= this.gravityTime) {
             this.gravityTimer = 0;
             this.deactivate();
+            this.updateGravityTime();
         }
     }
 
@@ -98,15 +103,24 @@ class PlayerObject extends PhysicsObject {
             return;
         }
 
-        this.coolDownTimer += dt * 1000 / 60;  // import it as a constant in the future
+        this.coolDownTimer += dt * GAME_CONSTANTS.LOOP_DELTA_TIME;
         if (this.coolDownTimer >= this.coolDownTime) {
             this.coolDownTimer = 0;
             this.isCooledDown = true;
+            this.updatecoolDownTime();
         }
     }
 
     updateGravityRadius() {
         this.gravityRadius = (3 * this.r) * this.gravityRadiusEasint;
+    }
+
+    updatecoolDownTime() {
+        // based on new R update min, max timer
+    }
+
+    updateGravityTime() {
+        // based on new R update min, max timer
     }
 
     /**
@@ -135,7 +149,7 @@ class PlayerObject extends PhysicsObject {
      * F = 1 * (PI * (r1^2 * r2^2) / dist^2)
      * @param {PhysicsObject} item 
      */
-    cravitate(item) {
+    gravitate(item) {
         const gravity = Vector2D.getDirection(item.position, this.position);
         const dist = Vector2D.getDistanceSqrt(item.position, this.position);
         const gravityMag = Math.PI * (this.r * this.r + item.r * item.r) / dist;
