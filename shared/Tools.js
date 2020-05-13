@@ -36,8 +36,5 @@ module.exports = {
     callAfter,
     randomInt,
     randomFloat,
-    randomColor,
-    normalize,
-    lerp,
-    map
+    randomColor
 };
