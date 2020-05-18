@@ -3,7 +3,7 @@ const Vector2D = require("./Vector2D.js");
 const PhysicsObject = require("./PhysicsObject.js");
 const PlayerObject = require("./PlayerObject.js");
 const BotObject = require("./BotObject.js");
-const { randomInt } = require("../shared/Tools.js");
+const { randomInt, randomFloat } = require("../shared/Tools.js");
 const { GAME_CONSTANTS } = require("../shared/Constants.js");
 
 class PhysicsWorld {
@@ -25,13 +25,14 @@ class PhysicsWorld {
         this.loopRennerId = "";
         this.prevTimestamp = 0;
         this.update = this.update.bind(this);
-        this.onSendData = () => { };
+
+        this.onWorldUpdated = () => { };
     }
 
-    run(onSendData) {
+    run(onWorldUpdated) {
         this.loopRennerId = setInterval(this.update, GAME_CONSTANTS.LOOP_DELTA_TIME);
         this.prevTimestamp = Date.now();
-        this.onSendData = onSendData;
+        this.onWorldUpdated = onWorldUpdated;
         Logger.addDividerLabel("Physics World Run", "#FFFF00", "#000000");
     }
 
@@ -43,7 +44,7 @@ class PhysicsWorld {
     cleanUpWorld() {
         this.items = [];
         this.players = [];
-        this.onSendData = () => { };
+        this.onWorldUpdated = () => { };
 
         Logger.addDividerLabel("Physics World Cleaned", "#FFFF00", "#000000");
     }
@@ -108,9 +109,14 @@ class PhysicsWorld {
 
     updatePlayerDir(data) {
         const player = this.players.find((player) => player.id === data.playerId);
-        const velocity = new Vector2D(data.x, data.y).normalize();
+        
+        if (!player) {
+            return;
+        }
 
+        const velocity = new Vector2D(data.x, data.y).normalize();
         player.applyForce(velocity);
+
         if (data.activate) {
             player.activate();
         }
@@ -129,11 +135,16 @@ class PhysicsWorld {
 
         this.updatePlayers(dt);
         this.updateItems(dt);
+
         this.calculateGravity(dt);
         this.calculateCollisions();
+
         this.respawnItems(dt);
         this.respawnBots(dt);
-        this.sendData();
+
+        this.destructPlayers();
+
+        this.finishUpdating();
     }
 
     updatePlayers(dt) {
@@ -219,16 +230,55 @@ class PhysicsWorld {
         }
     }
 
-    sendData() {
+    destructPlayers() {
+        this.players.forEach((player) => {
+            if (!player.isActivated) {
+                return;
+            }
+            this.players.forEach((other) => {
+                if (player === other) {
+                    return;
+                }
+                if (!player.canDestruct(other)) {
+                    return;
+                }
+
+                const { ITEM_SIZE_RANGE: [min, max] } = GAME_CONSTANTS;
+
+                const chunkSiez = randomInt(min, max);
+                const chunkPos = other.position.copy();
+                other.destruct(chunkSiez);
+
+                const direction = Vector2D.getDirection(chunkPos, player.position);
+
+                /* calculate an offset from the other player for the chunk to spawn. */
+                const angle = direction.getAngle();
+                direction.setAngle(angle + randomFloat(-Math.PI / 4, Math.PI / 4)); // Add some randomnes
+                direction.multiply(other.r * 1.2);
+
+                chunkPos.add(direction);
+
+                this.itemsIdCounter += 1;
+                this.itemsToRespawn -= 1;
+                this.items.push(new PhysicsObject(String(this.itemsIdCounter), chunkPos, chunkSiez));
+            });
+        });
+    }
+
+
+    finishUpdating() {
         const serialize = (el) => el.serialize();
 
-        const data = {
+        const payload = {
             time: this.prevTimestamp,
             players: this.players.map(serialize),
             items: this.items.map(serialize)
         };
 
-        this.onSendData(data);
+        const deadPlayers = this.players.filter((player) => player.isDestructed);
+        this.players = this.players.filter((player) => !player.isDestructed);
+
+        this.onWorldUpdated(payload, deadPlayers);
     }
 }
 
