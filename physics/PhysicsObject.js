@@ -27,7 +27,7 @@ class PhysicsObject {
      */
     update(dt) {
         this.velocity.multiply(dt);
-        this.position.add(this.velocity);
+        this.position.add(this.velocity.setLimit(10));
         this.velocity.multiply(0);
     }
 
