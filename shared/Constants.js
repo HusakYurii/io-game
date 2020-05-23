@@ -1,17 +1,22 @@
 const GAME_CONSTANTS = Object.freeze({
-    ITEM_RESPAWN_TIME_RANGE: [200, 600],
+    ITEM_RESPAWN_TIME_RANGE: [200, 1000],
     ITEM_AMOUNT: 300,
     ITEM_SIZE_RANGE: [8, 20], // min - max
+    DESTRUCTURED_ITEM_SIZE_RANGE: [4, 10],
+
+    MAX_VECTOR_SPEED: 10, // is used in PhysicsObject to avoid singularity
 
     BOTS_AMOUNT: 10,
-    BOT_ACTION_TIME_RANGE: [2000, 5000], // a range of how often a bot activates the gravity
+    BOT_ACTION_TIME_RANGE: [6000, 12000], // a range of how often a bot activates the gravity
     BOT_MOVEMENT_TIME_RANGE: [500, 5000], // a range of how often a bot changes the direction
     BOT_RESPAWN_TIME_RANGE: [2000, 10000],
     BOT_SIZE: 30,
 
     PLAYERS_AMOUNT: 10,
-    PLAYER_SPEED_RANGE: [3, 6],
-    PLAYER_GRAVITY_TIME_RANGE: [3500, 6000], // as a player grows the gravity action time goes down
+    PLAYER_SPEED_RANGE: [0.5, 3],
+    // PLAYER_GRAVITY_TIME_RANGE: [3500, 6000],  // as a player grows the gravity action time goes down
+    PLAYER_GRAVITY_TIME: 3500, // maybe constant ?
+    
     PLAYER_COOLDOWN_TIME_RANGE: [5000, 10000], // as a player grows the colldown time goes up
     PLAYER_SIZE: 30,
 
