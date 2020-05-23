@@ -1,4 +1,5 @@
 const Vector2D = require("./Vector2D.js");
+const { GAME_CONSTANTS } = require("../shared/Constants.js");
 
 class PhysicsObject {
     /**
@@ -27,7 +28,8 @@ class PhysicsObject {
      */
     update(dt) {
         this.velocity.multiply(dt);
-        this.position.add(this.velocity.setLimit(10));
+        this.velocity.setLimit(GAME_CONSTANTS.MAX_VECTOR_SPEED);
+        this.position.add(this.velocity);
         this.velocity.multiply(0);
     }
 

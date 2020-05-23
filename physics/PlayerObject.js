@@ -8,24 +8,19 @@ class PlayerObject extends PhysicsObject {
 
         this.score = 0;
 
-        const [grtMin, grtMax] = GAME_CONSTANTS.PLAYER_GRAVITY_TIME_RANGE;
-        this.gravityTime = grtMax;
+        this.gravityTime = GAME_CONSTANTS.PLAYER_GRAVITY_TIME;
         this.gravityTimer = 0;
-        this.gravityEasing = 0.5;  // TODO change it to function
         this.isActivated = false;
 
-        this.gravityRadiusEasint = 1.2;
-        this.gravityRadius = (3 * this.r);
-
+        this.gravityR = 3 * this.r;
 
         const [cdtMin, cdtMax] = GAME_CONSTANTS.PLAYER_COOLDOWN_TIME_RANGE
         this.coolDownTime = cdtMin;
         this.coolDownTimer = 0;
         this.isCooledDown = true;
-        this.coolDownEasing = 2.5;  // TODO change it to function
 
-        // TODO change it to function
-        this.velocityEasing = 1.2;
+        const [velMin, velMax] = GAME_CONSTANTS.PLAYER_SPEED_RANGE;
+        this.currVelocity = velMax;
         this.originalR = r;
     }
 
@@ -59,6 +54,7 @@ class PlayerObject extends PhysicsObject {
      */
     grow(size) {
         this.r = Math.sqrt(this.r * this.r + size * size);
+        this.currVelocity = this.calcVelocity();
     }
 
     /**
@@ -69,11 +65,10 @@ class PlayerObject extends PhysicsObject {
     update(dt) {
         this.updateGravityTimer(dt);
         this.updateCoolDownTimer(dt);
-        this.updateGravityRadius()
+        this.updateGravityR();
 
+        this.velocity.multiply(this.currVelocity);
 
-        const velocityMag = (this.originalR / this.r) * this.velocityEasing;
-        this.velocity.multiply(velocityMag);
         super.update(dt);
     }
 
@@ -111,8 +106,8 @@ class PlayerObject extends PhysicsObject {
         }
     }
 
-    updateGravityRadius() {
-        this.gravityRadius = (3 * this.r) * this.gravityRadiusEasint;
+    updateGravityR() {
+        this.gravityR = 3 * this.r;
     }
 
     updatecoolDownTime() {
@@ -124,20 +119,70 @@ class PlayerObject extends PhysicsObject {
     }
 
     /**
+     * Velocity is chenged by easing of 
+     * V(k) = k^n * Vmax
+     * k = (Roriginal / Rnew)^n
+     * 1 >= k >= Vmin/Vmax
+     * @returns {number};
+     */
+    calcVelocity() {
+        const [velMin, velMax] = GAME_CONSTANTS.PLAYER_SPEED_RANGE;
+        const sizeRatio = this.originalR / this.r;
+        const speedRatio = velMin / velMax;
+        const power = 0.7;
+
+        let k = Math.pow(sizeRatio, power);
+        k = (k >= 1) ? 1 : (k >= speedRatio) ? k : speedRatio;
+
+        let vel = (Math.pow(k, power) * velMax);
+        vel = Number(vel.toFixed(4));
+        return vel;
+    }
+
+    /**
+     * Basic circle - circle collision
      * @param {PhysicsObject} item 
      * @returns {boolean}
      */
     canAbsorb(item) {
-        const dist = Vector2D.getDistanceSqrt(this.position, item.position);
-        return (dist < (this.r * this.r + (item.r * item.r) / 2))
+        const dist = Vector2D.getDistance(this.position, item.position);
+        return (dist <= (this.r + item.r));
     }
 
     /**
+     * Basic circle - point collision
      * @param {PhysicsObject} item 
      * @returns {boolean}
      */
     canGravitate(item) {
-        return (this.position.getDistanceTo(item.position) < this.gravityRadius);
+        const dist = Vector2D.getDistance(this.position, item.position);
+        return (dist <= this.gravityR);
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    get isDestructed() {
+        return (this.r / this.originalR) < 1;
+    }
+
+    /**
+     * As a player is being destructured we need to change its size
+     * @param {number} size 
+     */
+    destruct(size) {
+        this.r = Math.sqrt(this.r * this.r - size * size);
+        this.currVelocity = this.calcVelocity();
+        this.countScore(-size);
+    }
+
+    /**
+     * @param {BotObject | PlayerObject} other 
+     * @returns {boolean}
+     */
+    canDestruct(other) {
+        const dist = Vector2D.getDistance(this.position, other.position);
+        return (dist <= (this.gravityR + other.r * 0.8));
     }
 
     /**
@@ -150,11 +195,11 @@ class PlayerObject extends PhysicsObject {
      * @param {PhysicsObject} item 
      */
     gravitate(item) {
-        const gravity = Vector2D.getDirection(item.position, this.position);
+        const unitForce = Vector2D.getDirection(item.position, this.position);
         const dist = Vector2D.getDistanceSqrt(item.position, this.position);
-        const gravityMag = Math.PI * (this.r * this.r + item.r * item.r) / dist;
-        gravity.multiply(gravityMag);
-        item.applyForce(gravity);
+        const gravity = Math.PI * (this.r * this.r + item.r * item.r) / dist;
+        // unitForce.multiply(gravity) the same as attraction force 
+        item.applyForce(unitForce.multiply(gravity)); 
     }
 
     /**
@@ -169,7 +214,7 @@ class PlayerObject extends PhysicsObject {
         data.gravityTime = this.gravityTime;
         data.coolDownTimer = this.coolDownTimer;
         data.coolDownTime = this.coolDownTime;
-        data.gravityRadius = this.gravityRadius;
+        data.gravityR = this.gravityR;
         return data;
     }
 }

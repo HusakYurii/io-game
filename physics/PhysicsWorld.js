@@ -231,20 +231,17 @@ class PhysicsWorld {
     }
 
     destructPlayers() {
+        const { DESTRUCTURED_ITEM_SIZE_RANGE: [min, max] } = GAME_CONSTANTS;
+
         this.players.forEach((player) => {
             if (!player.isActivated) {
                 return;
             }
             this.players.forEach((other) => {
-                if (player === other) {
+                if (player === other || !player.canDestruct(other)) {
                     return;
                 }
-                if (!player.canDestruct(other)) {
-                    return;
-                }
-
-                const { ITEM_SIZE_RANGE: [min, max] } = GAME_CONSTANTS;
-
+                
                 const chunkSiez = randomInt(min, max);
                 const chunkPos = other.position.copy();
                 other.destruct(chunkSiez);
@@ -253,7 +250,7 @@ class PhysicsWorld {
 
                 /* calculate an offset from the other player for the chunk to spawn. */
                 const angle = direction.getAngle();
-                direction.setAngle(angle + randomFloat(-Math.PI / 4, Math.PI / 4)); // Add some randomnes
+                direction.setAngle(angle + randomFloat(-Math.PI / 8, Math.PI / 8)); // Add some randomnes
                 direction.multiply(other.r * 1.2);
 
                 chunkPos.add(direction);
