@@ -54,7 +54,7 @@ class PlayerObject extends PhysicsObject {
      */
     grow(size) {
         this.r = Math.sqrt(this.r * this.r + size * size);
-        this.currVelocity = this.calcVelocity();
+        this.currVelocity = this.calcVelocity(false);
     }
 
     /**
@@ -123,13 +123,14 @@ class PlayerObject extends PhysicsObject {
      * V(k) = k^n * Vmax
      * k = (Roriginal / Rnew)^n
      * 1 >= k >= Vmin/Vmax
+     * @param {boolean} isDestructed - if a player is being destructured make his speed up quicker
      * @returns {number};
      */
-    calcVelocity() {
+    calcVelocity(isDestructed) {
         const [velMin, velMax] = GAME_CONSTANTS.PLAYER_SPEED_RANGE;
         const sizeRatio = this.originalR / this.r;
         const speedRatio = velMin / velMax;
-        const power = 0.7;
+        const power = isDestructed ? 0.5 : 0.8; // TODO think about more accurate easing
 
         let k = Math.pow(sizeRatio, power);
         k = (k >= 1) ? 1 : (k >= speedRatio) ? k : speedRatio;
@@ -172,7 +173,7 @@ class PlayerObject extends PhysicsObject {
      */
     destruct(size) {
         this.r = Math.sqrt(this.r * this.r - size * size);
-        this.currVelocity = this.calcVelocity();
+        this.currVelocity = this.calcVelocity(true);
         this.countScore(-size);
     }
 
@@ -199,7 +200,7 @@ class PlayerObject extends PhysicsObject {
         const dist = Vector2D.getDistanceSqrt(item.position, this.position);
         const gravity = Math.PI * (this.r * this.r + item.r * item.r) / dist;
         // unitForce.multiply(gravity) the same as attraction force 
-        item.applyForce(unitForce.multiply(gravity)); 
+        item.applyForce(unitForce.multiply(gravity));
     }
 
     /**

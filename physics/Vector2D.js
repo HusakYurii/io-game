@@ -133,7 +133,7 @@ class Vector2D {
      */
     setLimit(max) {
         var mag = this.getMagnitude();
-        if (mag > max) this.divide(mag).multiply(max);
+        if (mag > max) this.multiply(1 / mag).multiply(max);
         return this;
     }
 
