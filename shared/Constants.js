@@ -16,14 +16,16 @@ const GAME_CONSTANTS = Object.freeze({
     PLAYER_SPEED_RANGE: [0.5, 3],
     // PLAYER_GRAVITY_TIME_RANGE: [3500, 6000],  // as a player grows the gravity action time goes down
     PLAYER_GRAVITY_TIME: 3500, // maybe constant ?
-    
+
     PLAYER_COOLDOWN_TIME_RANGE: [5000, 10000], // as a player grows the colldown time goes up
     PLAYER_SIZE: 30,
 
     ROOMS_AMOUNT: 10,
     LOOP_DELTA_TIME: 1000 / 60,
     WORLD_WIDTH: 3000,
-    WORLD_HEIGTH: 3000
+    WORLD_HEIGTH: 3000,
+
+    GAME_RENDER_DELAY: (1000 / 60) * 10 //ms - difference in time of server and client (client is being rendered with delay of 10 frames)
 });
 
 const CONNECTION_CONSTANTS = Object.freeze({
