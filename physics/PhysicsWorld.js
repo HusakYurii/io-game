@@ -107,7 +107,7 @@ class PhysicsWorld {
         this.botsToRespawn += this.players.length < 10 ? 1 : 0;
     }
 
-    updatePlayerDir(data) {
+    updatePlayerData(data) {
         const player = this.players.find((player) => player.id === data.playerId);
         
         if (!player) {
