@@ -4,12 +4,10 @@
   "description": "io game",
   "scripts": {
     "run-nodemon-dev": "nodemon",
-    "run-nodemon-prod": "set NODE_ENV=production && nodemon",
     
-    "run-server-debugger-dev": "node --inspect ./io-game-server/index.js",
-    "run-server-debugger-prod": "set NODE_ENV=production && node --inspect ./io-game-server/index.js",
     "run-server": "node ./io-game-server/index.js",
-
+    "run-server-debug": "node --inspect ./io-game-server/index.js",
+        
     "run-webpack": "npm run run-webpack-prod && npm run run-webpack-dev",
     "run-webpack-dev": "webpack-dev-server --config webpack.config.dev.js",
     "run-webpack-prod": "webpack --config webpack.config.prod.js",
