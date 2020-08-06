@@ -17,3 +17,5 @@ To get an access chrome devtools and use debugger for `io-game-server` (BACK-END
 #### To enable production mode on the server
 
 In the case when you want run the server with `production` flag, you can add a script with `set NODE_ENV=production` (Windows);
+
+To play the game click [here](https://husakyurii.github.io/io-game/client/) you have to refresh it a few times to awake heroku server
